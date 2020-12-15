@@ -415,6 +415,12 @@ CustomersInsertionPath = "https://developers.apteo.co/api/v2/data-connectors/<ge
 Step = 10000
 for i in range(0, len(customers), Step):
     customer_subset = customers[i : i + Step]
+    for customer in customer_subset:
+        # Convert JSON objects to strings
+        customer.group_ids = str(customer.group_ids)
+        customer.segment_ids = str(customer.segment_ids)
+        customer.metadata = str(customer.metadata)
+
     body = {
         "dataRows": [customer.to_dict() for customer in customer_subset]
     }
@@ -434,12 +440,13 @@ OrdersInsertionApiPath = "https://developers.apteo.co/api/v2/data-connectors/<ge
 # Now we send in order data. Note that line items must be represented as a string for now.
 
 for i in range(0, len(orders), Step):
-    orders = orders[i : i + Step]
-    for order in orders:
+    order_subset = orders[i : i + Step]
+    for order in order_subset:
         # Convert line items to a string - this is a limitation of our current API
         order.line_items = str(order.line_items.to_dict())
+
     body = {
-        "dataRows": orders.to_dict()
+        "dataRows": order_subset.to_dict()
     }
 
     response = requests.post(url = OrdersInsertionApiPath, headers = headers, data = json.dumps(body, default = str))
