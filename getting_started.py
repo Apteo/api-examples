@@ -6,6 +6,7 @@ import numpy as np
 import json
 import requests
 import string
+import time
 
 # First get your customers and orders, we assume you have methods named `get_customers` and `get_orders` that queries your
 # database and maps them to the data classes "customers_data_model" and "orders_data_model" to map your data. Please note
@@ -430,9 +431,12 @@ for i in range(0, len(customers), Step):
 
     # You may run into issues sending data and if you do you should retry
     if response.status_code >= 300:
-        print("Error")
-        print("Current iteration: %s" % i)
-        break
+        time.sleep(10)
+        response = requests.post(url = CustomersInsertionPath, headers = headers, data = json.dumps(body, default = str))
+
+        if response.status_code >= 300:
+            print("There was an error, current iteration: %s" % i)
+            break
 
 headers = {"Authorization": "Basic %s" % ApiKey}
 OrdersInsertionApiPath = "https://developers.apteo.co/api/v2/data-connectors/<get ID from response above>/insert"
@@ -453,6 +457,9 @@ for i in range(0, len(orders), Step):
     print(response.__dict__)
 
     if response.status_code >= 300:
-        print("Error")
-        print("Current iteration: %s" % i)
-        break
+        time.sleep(10)
+        response = requests.post(url = OrdersInsertionApiPath, headers = headers, data = json.dumps(body, default = str))
+
+        if response.status_code >= 300:
+            print("There was an error, current iteration: %s" % i)
+            break
